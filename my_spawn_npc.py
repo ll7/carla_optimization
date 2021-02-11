@@ -9,6 +9,13 @@ def norm_vector(vector=carla.Vector3D):
     length = (vector.x**2 + vector.y**2 + vector.z**2)**(1/2)
     return vector/length
 
+def reward_function(distance):
+    if distance != 0.0:
+        reward = min(1/distance, 100)
+    else:
+        reward = 100
+    return reward
+
 def main():
     vehicles_list = []
     walkers_list = []
@@ -102,7 +109,9 @@ def main():
         spectator = world.get_spectator()
         spectator.set_transform(transform)
 
-        run_distance = 50
+        cumulative_reward = 0.0
+        RUN_DISTANCE = 50
+
         for i in range(30):
             vehicle = world.get_actor(vehicles_list[0])
             vehicle_location = vehicle.get_location()
@@ -110,14 +119,17 @@ def main():
             walker_location = all_actors[0].get_location()
             distance = walker_location.distance(vehicle_location)
             print('distance to vehicle: {}'.format(distance))
+            reward = reward_function(distance)
+            cumulative_reward += reward
+            print('reward: {}'.format(reward))
 
             if i == 0:
                 all_actors[0].start()
-            if distance > run_distance:
+            if distance > RUN_DISTANCE:
                 # all_actors[0].start()
                 all_actors[0].go_to_location(vehicle_location)
                 
-            elif distance <= run_distance:
+            elif distance <= RUN_DISTANCE:
                 print('running towards the vehicle')
                 
                 # OW + WC = OC <=> WC = OC - OW
@@ -134,6 +146,7 @@ def main():
 
         # time.sleep(20)
     finally:
+        print('cumulative_reward: {}'.format(cumulative_reward))
         print('\ndestroying %d vehicles' % len(vehicles_list))
         client.apply_batch([carla.command.DestroyActor(x) for x in vehicles_list])
 
