@@ -23,6 +23,17 @@ def plot_track():
     logging.info('plotting')
     global track
     logging.info(track)
+    min_distance = track[3]
+
+    index_min = min(range(len(min_distance)), key=min_distance.__getitem__)
+
+    print('min_distance is: {} and was found in iteration {} at x: {}, y: {}'.format(
+        min_distance[index_min], 
+        track[0][index_min], 
+        track[1][index_min], 
+        track[2][index_min]))
+
+    print(min(track[3]))
 
     fig = plt.figure()
     ax = Axes3D(fig)
@@ -161,25 +172,24 @@ def run_scenario(walk_dir):
         return min_distance
 
 def main():
+    start_time = time.time()
     iteration = 0
     res = minimize(run_scenario, 
                     method='Powell', 
-                    tol=0.1,
+                    tol=0.001,
                     options={
                         'return_all': bool,
-                        'ftol': 0.1,
-                        'xtol': 0.1,
-
-                        'maxiter': 3, 
+                        
+                        'maxiter': 50, 
                         'disp': True
                         },
                     x0=[-1.9, -0.4], 
                     bounds=((-2.0, 2.0), (-2.0, 2.0))
                     )
     logging.info(res)
-    
+    logging.info('duration: {}'.format(time.time()-start_time))
     plot_track()
-
+    
 
 
 if __name__ == '__main__':
