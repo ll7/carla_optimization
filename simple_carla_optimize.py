@@ -7,21 +7,42 @@ import time
 
 from scipy.optimize import minimize
 
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
+iteration = 0
+
+track = [[], [], [], []] # iteration, walk_x, walk_y, min_distance 
 
 def norm_vector(vector=carla.Vector3D):
     length = (vector.x**2 + vector.y**2 + vector.z**2)**(1/2)
     return vector/length
 
-def reward_function(distance):
-    if distance != 0.0:
-        reward = min(1/distance, 100)
-    else:
-        reward = 100
-    return reward
+def plot_track():
+    logging.info('plotting')
+    global track
+    logging.info(track)
+
+    fig = plt.figure()
+    ax = Axes3D(fig)
+
+    ax.scatter(track[1], track[2], track[3])
+
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('min_distance')
+    
+    plt.show()
+
 
 def run_scenario(walk_dir):
     walk_x, walk_y = walk_dir
+    logging.info('init scenario with x: {}, y: {}'.format(walk_x, walk_y))
+    global iteration
+    global track
+    iteration += 1
+    logging.info('iteration: {}'.format(iteration))
     vehicles_list = []
     walkers_list = []
     all_id = []
@@ -90,11 +111,13 @@ def run_scenario(walk_dir):
         walker_control = carla.WalkerControl()
 
         walker = world.get_actor(walkers_list[0]['id'])
-
         walker_direction = carla.Vector3D(x = walk_x, y = walk_y)
 
-        walker.apply_control(carla.WalkerControl(
-            direction = norm_vector(walker_direction), speed=1))
+        walker.apply_control(
+                    carla.WalkerControl(
+                        direction = walker_direction, 
+                        speed=1
+                        ))
 
 
         # spectator
@@ -122,20 +145,40 @@ def run_scenario(walk_dir):
         # time.sleep(20)
     finally:
         
-        logging.info('\ndestroying %d vehicles' % len(vehicles_list))
+        logging.debug('destroying %d vehicles' % len(vehicles_list))
         client.apply_batch([carla.command.DestroyActor(x) for x in vehicles_list])
 
-        logging.info('destroying %d walkers' % len(walkers_list))
+        logging.debug('destroying %d walkers' % len(walkers_list))
         client.apply_batch([carla.command.DestroyActor(x['id']) for x in walkers_list])
 
         time.sleep(0.5)
         logging.info('min_distance to vehicle: {}'.format(min_distance))
-        logging.info('for walk_x: {} and walk_y: {}'.format(walk_x, walk_y))
+        logging.info('finished scenario \n')
+        track[0].append(iteration)
+        track[1].append(walk_x)
+        track[2].append(walk_y)
+        track[3].append(min_distance)
         return min_distance
 
 def main():
-    res = minimize(run_scenario, x0=[-1.0, -1.0], bounds=((-1.0, 1.0), (-1.0, 1.0)))
-    print(res)
+    iteration = 0
+    res = minimize(run_scenario, 
+                    method='Powell', 
+                    tol=0.1,
+                    options={
+                        'return_all': bool,
+                        'ftol': 0.1,
+                        'xtol': 0.1,
+
+                        'maxiter': 3, 
+                        'disp': True
+                        },
+                    x0=[-1.9, -0.4], 
+                    bounds=((-2.0, 2.0), (-2.0, 2.0))
+                    )
+    logging.info(res)
+    
+    plot_track()
 
 
 
