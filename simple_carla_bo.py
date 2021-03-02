@@ -4,6 +4,7 @@ import carla
 import random
 import logging
 import time
+import numpy as np
 
 from bayes_opt import BayesianOptimization
 
@@ -36,10 +37,25 @@ def plot_track():
     print(min(track[3]))
 
     fig = plt.figure()
-    ax = Axes3D(fig)
+    ax = fig.add_subplot(111, projection='3d')
+    # ax = Axes3D(fig)
 
-    ax.scatter(track[1], track[2], track[3])
+    # ax.scatter(track[1], track[2], track[3])
+    ax.plot_trisurf(
+        np.array(track[1]), 
+        np.array(track[2]), 
+        np.array(track[3]),
+        cmap=plt.cm.Spectral
+        )
 
+    ax.scatter(
+        track[1][index_min], 
+        track[2][index_min], 
+        track[3][index_min], 
+        s=128, 
+        c='red', 
+        alpha=1
+        )
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.set_zlabel('min_distance')
