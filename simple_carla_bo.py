@@ -7,6 +7,7 @@ import time
 import numpy as np
 
 from bayes_opt import BayesianOptimization
+from bayes_opt import SequentialDomainReductionTransformer
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -123,7 +124,7 @@ def run_scenario(walk_x, walk_y):
 
         # walker
         batch = []
-        transform = carla.Transform(carla.Location(x=120.647888, y=12.172070, z=1.055295), carla.Rotation(pitch=1.602929, yaw=-157.672867, roll=0.000046))
+        transform = carla.Transform(carla.Location(x=100.647888, y=11.172070, z=1.055295), carla.Rotation(pitch=1.602929, yaw=-157.672867, roll=0.000046))
         blueprintsWalkers = world.get_blueprint_library().filter('walker.pedestrian.*')
 
         walker_bp = random.choice(blueprintsWalkers)
@@ -189,12 +190,18 @@ def run_scenario(walk_x, walk_y):
 def main():
     start_time = time.time()
     iteration = 0
+
+    run_scenario(-1.3344522955990954, -0.6953082740892751)
+
     pbounds = {'walk_x': (-2.0, 2.0), 'walk_y': (-2.0, 2.0)}
+    bounds_transformer = SequentialDomainReductionTransformer()
+
     optimizer = BayesianOptimization(
         f=run_scenario,
         pbounds=pbounds,
         verbose=2, 
         random_state=1,
+        bounds_transformer=bounds_transformer
     )
     
     optimizer.probe(
@@ -203,13 +210,14 @@ def main():
     )
 
     optimizer.maximize(
-        init_points=10,
-        n_iter=50,
+        init_points=5,
+        n_iter=20,
     )
 
     logging.info(optimizer.max)
     logging.info('duration: {}'.format(time.time()-start_time))
     plot_track()
+    logging.info('bounds: {}'.format(bounds_transformer))
 
 
 if __name__ == '__main__':
