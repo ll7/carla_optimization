@@ -5,7 +5,6 @@ import random
 import logging
 import time
 
-from scipy.optimize import minimize
 from bayes_opt import BayesianOptimization
 
 import matplotlib.pyplot as plt
