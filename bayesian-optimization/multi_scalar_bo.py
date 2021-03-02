@@ -10,7 +10,7 @@ import numpy as np
 def my_func(x, y):
     
     # print('x: {}'. format(x))
-    return np.sin((np.power(x, 2) + np.power(y, 2)) ) + 0.1 * np.power(x-4, 3)
+    return -(np.sin((np.power(x, 2) + np.power(y, 2)) ) + 0.1 * np.power(x-4, 3))
     #np.sin( 10*(np.power(x, 2)+np.power(y,2)) ) / 10 + 0.1 * np.power(x-4, 1.1)
 
 pbounds = {'x': (2.0, 6.0), 'y': (2.0, 6.0)}
@@ -23,8 +23,8 @@ optimizer = BayesianOptimization(
 )
 
 optimizer.maximize(
-    init_points=2,
-    n_iter=3,
+    init_points=20,
+    n_iter=100,
 )
 
 print(optimizer.max)
