@@ -123,7 +123,7 @@ def run_scenario(walk_x, walk_y):
 
         # walker
         batch = []
-        transform = carla.Transform(carla.Location(x=135.647888, y=13.172070, z=1.055295), carla.Rotation(pitch=1.602929, yaw=-157.672867, roll=0.000046))
+        transform = carla.Transform(carla.Location(x=120.647888, y=12.172070, z=1.055295), carla.Rotation(pitch=1.602929, yaw=-157.672867, roll=0.000046))
         blueprintsWalkers = world.get_blueprint_library().filter('walker.pedestrian.*')
 
         walker_bp = random.choice(blueprintsWalkers)
@@ -154,7 +154,7 @@ def run_scenario(walk_x, walk_y):
         cumulative_reward = 0.0
 
         
-        for i in range(20):
+        for i in range(12):
             
             vehicle = world.get_actor(vehicles_list[0])
             vehicle_location = vehicle.get_location()
