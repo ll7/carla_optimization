@@ -107,7 +107,7 @@ def run_scenario(walk_x, walk_y):
 
         # walker
         batch = []
-        transform = carla.Transform(carla.Location(x=185.647888, y=15.172070, z=1.055295), carla.Rotation(pitch=1.602929, yaw=-157.672867, roll=0.000046))
+        transform = carla.Transform(carla.Location(x=135.647888, y=13.172070, z=1.055295), carla.Rotation(pitch=1.602929, yaw=-157.672867, roll=0.000046))
         blueprintsWalkers = world.get_blueprint_library().filter('walker.pedestrian.*')
 
         walker_bp = random.choice(blueprintsWalkers)
