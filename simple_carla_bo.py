@@ -6,6 +6,7 @@ import logging
 import time
 
 from scipy.optimize import minimize
+from bayes_opt import BayesianOptimization
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -47,8 +48,7 @@ def plot_track():
     plt.show()
 
 
-def run_scenario(walk_dir):
-    walk_x, walk_y = walk_dir
+def run_scenario(walk_x, walk_y):
     logging.info('init scenario with x: {}, y: {}'.format(walk_x, walk_y))
     global iteration
     global track
@@ -169,27 +169,32 @@ def run_scenario(walk_dir):
         track[1].append(walk_x)
         track[2].append(walk_y)
         track[3].append(min_distance)
-        return min_distance
+        return -min_distance
 
 def main():
     start_time = time.time()
     iteration = 0
-    res = minimize(run_scenario, 
-                    method='Powell', 
-                    tol=0.001,
-                    options={
-                        'return_all': bool,
-                        
-                        'maxiter': 50, 
-                        'disp': True
-                        },
-                    x0=[-1.9, -0.4], 
-                    bounds=((-2.0, 2.0), (-2.0, 2.0))
-                    )
-    logging.info(res)
+    pbounds = {'walk_x': (-2.0, 2.0), 'walk_y': (-2.0, 2.0)}
+    optimizer = BayesianOptimization(
+        f=run_scenario,
+        pbounds=pbounds,
+        verbose=2, 
+        random_state=1,
+    )
+    
+    optimizer.probe(
+        params={"walk_x": -1.9, "walk_y": -0.3},
+        lazy=True
+    )
+
+    optimizer.maximize(
+        init_points=10,
+        n_iter=50,
+    )
+
+    logging.info(optimizer.max)
     logging.info('duration: {}'.format(time.time()-start_time))
     plot_track()
-    
 
 
 if __name__ == '__main__':
