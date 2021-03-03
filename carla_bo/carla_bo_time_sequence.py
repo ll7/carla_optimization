@@ -64,7 +64,12 @@ def plot_track():
     plt.show()
 
 
-def run_scenario(walk_x, walk_y):
+def run_scenario(x_0, x_1, x_2, x_3, x_4, x_5, x_6, x_7, x_8, x_9, y_0, y_1, y_2, y_3, y_4, y_5, y_6, y_7, y_8, y_9):
+    #walk_x, walk_y):
+    x_list = [x_0, x_1, x_2, x_3, x_4, x_5, x_6, x_7, x_8, x_9]
+    y_list = [y_0, y_1, y_2, y_3, y_4, y_5, y_6, y_7, y_8, y_9]
+    walk_x = x_list[0]
+    walk_y = y_list[0]
     logging.info('init scenario with x: {}, y: {}'.format(walk_x, walk_y))
     global iteration
     global track
@@ -155,8 +160,13 @@ def run_scenario(walk_x, walk_y):
         cumulative_reward = 0.0
 
         
-        for i in range(12):
-            
+        for i in range(len(x_list)):
+            walker_direction = carla.Vector3D(x = x_list[i], y = x_list[i])
+            walker.apply_control(
+                    carla.WalkerControl(
+                        direction = walker_direction, 
+                        speed=1
+                        ))
             vehicle = world.get_actor(vehicles_list[0])
             vehicle_location = vehicle.get_location()
             walker_location = walker.get_location()
@@ -191,9 +201,33 @@ def main():
     start_time = time.time()
     iteration = 0
 
-    run_scenario(-1.3344522955990954, -0.6953082740892751)
+    # run_scenario(-1.3344522955990954, -0.6953082740892751)
+    #run_scenario(1.0, 0.0)
+    #run_scenario(0.0, 1.0)
+    run_scenario(x_0= -0.7750768090284623, x_1= 1.1781157181630055, x_2= -2.0, x_3= 0.22624889884959426, x_4= -1.8071693062168928, x_5= -0.9759442272469341, x_6= -1.4016624734203218, x_7= -0.21744511187233925, x_8= -0.5174869410031995, x_9= 0.11077977549303636, y_0= -1.215880406042104, y_1= 0.13930334215392173, y_2= -1.8060465883366803, y_3= -0.2637782061745287, y_4= -1.014170606327852, y_5= 1.739060008211137, y_6= -1.0689642649426279, y_7= 1.5799232677858592, y_8= -0.5896139558573852, y_9= -1.5161041780876645)
 
-    pbounds = {'walk_x': (-2.0, 2.0), 'walk_y': (-2.0, 2.0)}
+    pbounds = {
+        'x_0': (-2.0, 2.0), 
+        'x_1': (-2.0, 2.0), 
+        'x_2': (-2.0, 2.0), 
+        'x_3': (-2.0, 2.0), 
+        'x_4': (-2.0, 2.0), 
+        'x_5': (-2.0, 2.0), 
+        'x_6': (-2.0, 2.0), 
+        'x_7': (-2.0, 2.0), 
+        'x_8': (-2.0, 2.0), 
+        'x_9': (-2.0, 2.0), 
+        'y_0': (-2.0, 2.0), 
+        'y_1': (-2.0, 2.0), 
+        'y_2': (-2.0, 2.0), 
+        'y_3': (-2.0, 2.0), 
+        'y_4': (-2.0, 2.0), 
+        'y_5': (-2.0, 2.0), 
+        'y_6': (-2.0, 2.0), 
+        'y_7': (-2.0, 2.0), 
+        'y_8': (-2.0, 2.0), 
+        'y_9': (-2.0, 2.0), 
+        }
     bounds_transformer = SequentialDomainReductionTransformer()
 
     optimizer = BayesianOptimization(
@@ -202,11 +236,6 @@ def main():
         verbose=2, 
         random_state=1,
         bounds_transformer=bounds_transformer
-    )
-    
-    optimizer.probe(
-        params={"walk_x": -1.9, "walk_y": -0.3},
-        lazy=True
     )
 
     optimizer.maximize(
